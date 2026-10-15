@@ -1,0 +1,102 @@
+@model List<Dish_BIT247672>
+@{
+    ViewData["Title"] = T["title_dishes"];
+    var qs = Context.Request.Query;
+    var cats = (List<DishCategory_BIT247672>)ViewBag.Categories;
+    string status = qs["status"].ToString();
+    string sort = qs["sort"].ToString();
+    string cf = T["confirm_delete"];
+}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h1 class="h3 m-0">@T["title_dishes"]</h1>
+    <a class="btn btn-brand" asp-action="Create">+ @T["create_dish"]</a>
+</div>
+
+<form method="get" asp-action="Index" class="panel filters mb-3">
+    <div class="row g-3">
+        <div class="col-lg-4 col-md-6">
+            <label class="form-label">@T["search"]</label>
+            <input type="text" name="q" class="form-control" value="@qs["q"]" placeholder="@T["search_ph"]" />
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <label class="form-label">@T["category"]</label>
+            <select name="categoryId" class="form-select">
+                <option value="">@T["all_categories"]</option>
+                @foreach (var c in cats) { <option value="@c.Id" selected="@(qs["categoryId"].ToString() == c.Id.ToString())">@c.Name</option> }
+            </select>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <label class="form-label">@T["status"]</label>
+            <select name="status" class="form-select">
+                <option value="" selected="@(status == "")">@T["all_status"]</option>
+                <option value="available" selected="@(status == "available")">@T["available"]</option>
+                <option value="unavailable" selected="@(status == "unavailable")">@T["unavailable"]</option>
+            </select>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <label class="form-label">@T["min_price"]</label>
+            <input type="number" step="any" name="minPrice" class="form-control" value="@qs["minPrice"]" />
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <label class="form-label">@T["max_price"]</label>
+            <input type="number" step="any" name="maxPrice" class="form-control" value="@qs["maxPrice"]" />
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <label class="form-label">@T["sort"]</label>
+            <select name="sort" class="form-select">
+                <option value="" selected="@(sort == "")">@T["sort_default"]</option>
+                <option value="price_asc" selected="@(sort == "price_asc")">@T["sort_price_asc"]</option>
+                <option value="price_desc" selected="@(sort == "price_desc")">@T["sort_price_desc"]</option>
+                <option value="time_asc" selected="@(sort == "time_asc")">@T["sort_time_asc"]</option>
+            </select>
+        </div>
+        <div class="col-lg-3 col-md-6 d-flex align-items-end gap-2">
+            <button class="btn btn-brand flex-grow-1" type="submit">@T["filter"]</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">@T["reset"]</a>
+        </div>
+    </div>
+    @if (ViewBag.RangeError == true) { <div class="alert alert-warning mt-3 mb-0">@T["err_range"]</div> }
+</form>
+
+@if (!Model.Any())
+{
+    <div class="panel text-center py-5 text-muted"><div class="display-5">🔍</div><p class="mt-2 mb-0">@T["no_results"]</p></div>
+}
+else
+{
+    <div class="panel p-0 table-wrap">
+        <table class="table align-middle m-0">
+            <thead><tr>
+                <th>@T["image"]</th><th>@T["name"]</th><th>@T["category"]</th><th class="text-end">@T["price"]</th>
+                <th>@T["prep_time"]</th><th>@T["status"]</th><th class="text-end">@T["actions"]</th>
+            </tr></thead>
+            <tbody>
+            @foreach (var d in Model)
+            {
+                var thumb = d.Images.FirstOrDefault(i => i.IsThumbnail) ?? d.Images.FirstOrDefault();
+                <tr class="@(d.IsAvailable ? "" : "off")">
+                    <td style="width:84px">
+                        @if (thumb != null) { <img class="thumb" src="@thumb.ImageUrl" alt="@d.Name" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'thumb ph',textContent:'🍽️'}))" /> }
+                        else { <div class="thumb ph" title="@T["no_image"]">🍽️</div> }
+                    </td>
+                    <td><a class="dish-name" asp-action="Details" asp-route-id="@d.Id">@d.Name</a></td>
+                    <td>@d.DishCategory.Name</td>
+                    <td class="text-end fw-semibold">@d.Price.ToString("N0") ₫</td>
+                    <td>
+                        <span class="pill @(d.PreparationTime <= 15 ? "pill-quick" : "pill-regular")">@T.Time(d.PreparationTime)</span>
+                        <small class="text-muted ms-1">@d.PreparationTime @T["minutes"]</small>
+                    </td>
+                    <td><span class="pill @(d.IsAvailable ? "pill-on" : "pill-off")">@(d.IsAvailable ? T["available"] : T["unavailable"])</span></td>
+                    <td class="text-end text-nowrap">
+                        <a class="btn btn-sm btn-outline-dark" asp-action="Details" asp-route-id="@d.Id">@T["details"]</a>
+                        <a class="btn btn-sm btn-outline-dark" asp-action="Edit" asp-route-id="@d.Id">@T["edit"]</a>
+                        <form method="post" asp-action="Delete" asp-route-id="@d.Id" class="d-inline" onsubmit="return confirm('@cf')">
+                            <button class="btn btn-sm btn-outline-danger" type="submit">@T["delete"]</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

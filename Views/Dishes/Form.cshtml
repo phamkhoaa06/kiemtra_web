@@ -1,0 +1,52 @@
+@model Dish_BIT247672
+@{
+    bool isNew = Model.Id == 0;
+    ViewData["Title"] = isNew ? T["create_dish"] : T["edit_dish"];
+    var cats = (List<DishCategory_BIT247672>)ViewBag.Categories;
+    string Err(string k) => ViewContext.ModelState.TryGetValue(k, out var e) && e.Errors.Count > 0 ? e.Errors[0].ErrorMessage : null;
+}
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+<form method="post" novalidate action="@Url.Action(isNew ? "Create" : "Edit", new { id = isNew ? (int?)null : Model.Id })" class="panel form-panel">
+    <div class="row g-3">
+        <div class="col-md-8">
+            <label class="form-label">@T["name"]</label>
+            <input type="text" name="Name" maxlength="150" class="form-control @(Err("Name") != null ? "is-invalid" : "")" value="@Model.Name" />
+            @if (Err("Name") != null) { <div class="invalid-feedback">@Err("Name")</div> }
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">@T["category"]</label>
+            <select name="DishCategoryId" class="form-select @(Err("DishCategoryId") != null ? "is-invalid" : "")">
+                <option value="0">@T["select_category"]</option>
+                @foreach (var c in cats) { <option value="@c.Id" selected="@(Model.DishCategoryId == c.Id)">@c.Name</option> }
+            </select>
+            @if (Err("DishCategoryId") != null) { <div class="invalid-feedback">@Err("DishCategoryId")</div> }
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">@T["price"] (₫)</label>
+            <input type="number" step="any" name="Price" class="form-control @(Err("Price") != null ? "is-invalid" : "")"
+                   value="@(Model.Price != 0 ? Model.Price.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) : "")" />
+            @if (Err("Price") != null) { <div class="invalid-feedback">@Err("Price")</div> }
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">@T["prep_time"] (@T["minutes"])</label>
+            <input type="number" step="any" name="PreparationTime" class="form-control @(Err("PreparationTime") != null ? "is-invalid" : "")"
+                   value="@(Model.PreparationTime != 0 ? Model.PreparationTime.ToString() : "")" />
+            @if (Err("PreparationTime") != null) { <div class="invalid-feedback">@Err("PreparationTime")</div> }
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+            <div class="form-check form-switch fs-6 mb-2">
+                <input class="form-check-input" type="checkbox" id="IsAvailable" name="IsAvailable" value="true" checked="@Model.IsAvailable" />
+                <input type="hidden" name="IsAvailable" value="false" />
+                <label class="form-check-label" for="IsAvailable">@T["on_sale"]</label>
+            </div>
+        </div>
+        <div class="col-12">
+            <label class="form-label">@T["description"]</label>
+            <textarea name="Description" rows="3" maxlength="1000" class="form-control">@Model.Description</textarea>
+        </div>
+    </div>
+    <div class="mt-4 d-flex gap-2">
+        <button class="btn btn-brand" type="submit">@T["save"]</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">@T["cancel"]</a>
+    </div>
+</form>

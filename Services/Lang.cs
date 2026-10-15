@@ -1,0 +1,90 @@
+namespace MonAn.Services;
+
+public class Lang
+{
+    private readonly IHttpContextAccessor _h;
+    public Lang(IHttpContextAccessor h) { _h = h; }
+
+    public string Code => _h.HttpContext?.Request.Cookies["lang"] == "vi" ? "vi" : "en";
+    public bool IsVi => Code == "vi";
+    public string this[string key] => D.TryGetValue(key, out var v) ? (IsVi ? v.vi : v.en) : key;
+    public string Time(int minutes) => this[minutes <= 15 ? "quick" : "regular"];
+
+    private static readonly Dictionary<string, (string en, string vi)> D = new()
+    {
+        ["app_title"] = ("Dish Manager", "Quản lý món ăn"),
+        ["nav_dishes"] = ("Dishes", "Món ăn"),
+        ["nav_categories"] = ("Categories", "Loại món"),
+        ["title_dishes"] = ("Dish list", "Danh sách món ăn"),
+        ["title_categories"] = ("Dish categories", "Danh sách loại món"),
+        ["search"] = ("Search by name", "Tìm theo tên món"),
+        ["search_ph"] = ("e.g. Pho", "Ví dụ: Phở"),
+        ["category"] = ("Category", "Loại món"),
+        ["all_categories"] = ("All categories", "Tất cả loại món"),
+        ["status"] = ("Status", "Trạng thái"),
+        ["all_status"] = ("All", "Tất cả"),
+        ["available"] = ("Available", "Đang bán"),
+        ["unavailable"] = ("Unavailable", "Ngừng bán"),
+        ["min_price"] = ("Price from", "Giá từ"),
+        ["max_price"] = ("Price to", "Giá đến"),
+        ["sort"] = ("Sort by", "Sắp xếp"),
+        ["sort_default"] = ("Name A-Z", "Tên A-Z"),
+        ["sort_price_asc"] = ("Price: low to high", "Giá tăng dần"),
+        ["sort_price_desc"] = ("Price: high to low", "Giá giảm dần"),
+        ["sort_time_asc"] = ("Preparation time: shortest first", "Thời gian chế biến tăng dần"),
+        ["filter"] = ("Apply filters", "Lọc"),
+        ["reset"] = ("Reset", "Đặt lại"),
+        ["name"] = ("Name", "Tên món"),
+        ["price"] = ("Price", "Giá"),
+        ["prep_time"] = ("Preparation time", "Thời gian chế biến"),
+        ["minutes"] = ("min", "phút"),
+        ["description"] = ("Description", "Mô tả"),
+        ["image"] = ("Image", "Ảnh"),
+        ["actions"] = ("Actions", "Thao tác"),
+        ["details"] = ("Details", "Chi tiết"),
+        ["edit"] = ("Edit", "Sửa"),
+        ["delete"] = ("Delete", "Xóa"),
+        ["save"] = ("Save", "Lưu"),
+        ["cancel"] = ("Cancel", "Hủy"),
+        ["back"] = ("Back to list", "Quay lại danh sách"),
+        ["create_dish"] = ("Add new dish", "Thêm món ăn"),
+        ["edit_dish"] = ("Edit dish", "Sửa món ăn"),
+        ["create_category"] = ("Add new category", "Thêm loại món"),
+        ["edit_category"] = ("Edit category", "Sửa loại món"),
+        ["select_category"] = ("-- Select a category --", "-- Chọn loại món --"),
+        ["quick"] = ("Quick", "Nhanh"),
+        ["regular"] = ("Regular", "Thông thường"),
+        ["no_results"] = ("No dishes match your search. Try changing or resetting the filters.", "Không tìm thấy món ăn phù hợp. Hãy đổi hoặc đặt lại bộ lọc."),
+        ["no_categories"] = ("No categories yet. Add the first one.", "Chưa có loại món nào. Hãy thêm loại món đầu tiên."),
+        ["no_image"] = ("No image yet", "Chưa có ảnh"),
+        ["no_images"] = ("This dish has no images yet. Add one below.", "Món này chưa có ảnh. Hãy thêm ảnh bên dưới."),
+        ["images"] = ("Images", "Hình ảnh"),
+        ["add_image"] = ("Add image", "Thêm ảnh"),
+        ["image_url"] = ("Image URL", "Đường dẫn ảnh"),
+        ["is_thumbnail"] = ("Thumbnail", "Ảnh đại diện"),
+        ["use_as_thumb"] = ("Use as thumbnail", "Đặt làm ảnh đại diện"),
+        ["remove_image"] = ("Remove image", "Xóa ảnh"),
+        ["dish_count"] = ("Dishes", "Số món"),
+        ["confirm_delete"] = ("Are you sure you want to delete this item?", "Bạn có chắc chắn muốn xóa mục này?"),
+        ["dish_detail"] = ("Dish details", "Chi tiết món ăn"),
+        ["language"] = ("Language", "Ngôn ngữ"),
+        ["on_sale"] = ("Currently on sale", "Đang bán"),
+        // messages & validation
+        ["err_name_required"] = ("Name is required.", "Tên không được để trống."),
+        ["err_price"] = ("Price must be greater than 0.", "Giá phải lớn hơn 0."),
+        ["err_time"] = ("Preparation time must be greater than 0.", "Thời gian chế biến phải lớn hơn 0."),
+        ["err_category_missing"] = ("Please choose an existing category.", "Vui lòng chọn một loại món có trong hệ thống."),
+        ["err_name_dup"] = ("A dish with this name already exists in this category.", "Tên món ăn đã tồn tại trong loại món này."),
+        ["err_cat_dup"] = ("A category with this name already exists.", "Tên loại món đã tồn tại."),
+        ["err_range"] = ("Invalid price range: values must be numbers of 0 or more, and 'from' cannot exceed 'to'. The price filter was ignored.", "Khoảng giá không hợp lệ: giá phải là số từ 0 trở lên và 'từ' không được lớn hơn 'đến'. Bộ lọc giá đã bị bỏ qua."),
+        ["err_dish_nf"] = ("This dish does not exist or was deleted.", "Món ăn không tồn tại hoặc đã bị xóa."),
+        ["err_cat_nf"] = ("This category does not exist or was deleted.", "Loại món không tồn tại hoặc đã bị xóa."),
+        ["err_img_nf"] = ("This image does not exist or was deleted.", "Ảnh không tồn tại hoặc đã bị xóa."),
+        ["err_cat_in_use"] = ("Cannot delete this category because dishes are still using it.", "Không thể xóa loại món này vì vẫn còn món ăn đang sử dụng."),
+        ["err_image_url"] = ("Enter a valid image URL starting with http:// or https://.", "Hãy nhập đường dẫn ảnh hợp lệ bắt đầu bằng http:// hoặc https://."),
+        ["ok_saved"] = ("Saved successfully.", "Đã lưu thành công."),
+        ["ok_deleted"] = ("Deleted successfully.", "Đã xóa thành công."),
+        ["ok_image_added"] = ("Image added.", "Đã thêm ảnh."),
+        ["ok_thumb"] = ("Thumbnail updated.", "Đã cập nhật ảnh đại diện."),
+    };
+}

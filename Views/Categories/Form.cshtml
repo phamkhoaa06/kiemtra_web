@@ -1,0 +1,22 @@
+@model DishCategory_BIT247672
+@{
+    bool isNew = Model.Id == 0;
+    ViewData["Title"] = isNew ? T["create_category"] : T["edit_category"];
+    string Err(string k) => ViewContext.ModelState.TryGetValue(k, out var e) && e.Errors.Count > 0 ? e.Errors[0].ErrorMessage : null;
+}
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+<form method="post" novalidate action="@Url.Action(isNew ? "Create" : "Edit", new { id = isNew ? (int?)null : Model.Id })" class="panel form-panel">
+    <div class="mb-3">
+        <label class="form-label">@T["name"]</label>
+        <input type="text" name="Name" maxlength="100" class="form-control @(Err("Name") != null ? "is-invalid" : "")" value="@Model.Name" />
+        @if (Err("Name") != null) { <div class="invalid-feedback">@Err("Name")</div> }
+    </div>
+    <div class="mb-3">
+        <label class="form-label">@T["description"]</label>
+        <textarea name="Description" rows="3" maxlength="500" class="form-control">@Model.Description</textarea>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-brand" type="submit">@T["save"]</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">@T["cancel"]</a>
+    </div>
+</form>

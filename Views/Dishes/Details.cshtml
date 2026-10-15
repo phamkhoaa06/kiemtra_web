@@ -1,0 +1,85 @@
+@model Dish_BIT247672
+@{
+    ViewData["Title"] = Model.Name;
+    var imgs = Model.Images.OrderByDescending(i => i.IsThumbnail).ThenBy(i => i.Id).ToList();
+    var main = imgs.FirstOrDefault();
+    string cf = T["confirm_delete"];
+    string ph = "this.replaceWith(Object.assign(document.createElement('div'),{className:'hero-img ph',textContent:'🍽️'}))";
+}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <a class="btn btn-outline-secondary btn-sm" asp-action="Index">← @T["back"]</a>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-dark btn-sm" asp-action="Edit" asp-route-id="@Model.Id">@T["edit"]</a>
+        <form method="post" asp-action="Delete" asp-route-id="@Model.Id" onsubmit="return confirm('@cf')">
+            <button class="btn btn-outline-danger btn-sm" type="submit">@T["delete"]</button>
+        </form>
+    </div>
+</div>
+
+<div class="panel mb-4">
+    <div class="row g-4">
+        <div class="col-lg-5">
+            @if (main != null) { <img class="hero-img" src="@main.ImageUrl" alt="@Model.Name" onerror="@ph" /> }
+            else { <div class="hero-img ph"><span>🍽️<small>@T["no_image"]</small></span></div> }
+        </div>
+        <div class="col-lg-7">
+            <h1 class="h2">@Model.Name</h1>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <span class="pill pill-cat">@Model.DishCategory.Name</span>
+                <span class="pill @(Model.IsAvailable ? "pill-on" : "pill-off")">@(Model.IsAvailable ? T["available"] : T["unavailable"])</span>
+                <span class="pill @(Model.PreparationTime <= 15 ? "pill-quick" : "pill-regular")">@T.Time(Model.PreparationTime)</span>
+            </div>
+            <div class="price-big">@Model.Price.ToString("N0") ₫</div>
+            <dl class="row mt-3">
+                <dt class="col-sm-4">@T["prep_time"]</dt><dd class="col-sm-8">@Model.PreparationTime @T["minutes"]</dd>
+                <dt class="col-sm-4">@T["category"]</dt><dd class="col-sm-8">@Model.DishCategory.Name</dd>
+                <dt class="col-sm-4">@T["description"]</dt><dd class="col-sm-8">@Model.Description</dd>
+            </dl>
+        </div>
+    </div>
+</div>
+
+<h2 class="h4 mb-3">@T["images"] (@imgs.Count)</h2>
+@if (!imgs.Any()) { <div class="panel text-muted mb-3">@T["no_images"]</div> }
+else
+{
+    <div class="row g-3 mb-3">
+    @foreach (var i in imgs)
+    {
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="gallery-card @(i.IsThumbnail ? "is-thumb" : "")">
+                <img src="@i.ImageUrl" alt="@Model.Name" onerror="this.style.opacity='.15'" />
+                <div class="p-2 d-flex flex-column gap-2">
+                    @if (i.IsThumbnail) { <span class="pill pill-on text-center">★ @T["is_thumbnail"]</span> }
+                    else
+                    {
+                        <form method="post" asp-action="SetThumbnail" asp-route-id="@i.Id">
+                            <button class="btn btn-sm btn-outline-dark w-100" type="submit">@T["use_as_thumb"]</button>
+                        </form>
+                    }
+                    <form method="post" asp-action="DeleteImage" asp-route-id="@i.Id" onsubmit="return confirm('@cf')">
+                        <button class="btn btn-sm btn-outline-danger w-100" type="submit">@T["remove_image"]</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+    </div>
+}
+
+<form method="post" asp-action="AddImage" asp-route-id="@Model.Id" class="panel">
+    <h3 class="h6">@T["add_image"]</h3>
+    <div class="row g-3 align-items-end">
+        <div class="col-md-7">
+            <label class="form-label">@T["image_url"]</label>
+            <input type="text" name="imageUrl" class="form-control" placeholder="https://..." />
+        </div>
+        <div class="col-md-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="isThumbnail" name="isThumbnail" value="true" />
+                <label class="form-check-label" for="isThumbnail">@T["is_thumbnail"]</label>
+            </div>
+        </div>
+        <div class="col-md-2"><button class="btn btn-brand w-100" type="submit">@T["add_image"]</button></div>
+    </div>
+</form>

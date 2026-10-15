@@ -1,0 +1,34 @@
+@model List<DishCategory_BIT247672>
+@{
+    ViewData["Title"] = T["title_categories"];
+    string cf = T["confirm_delete"];
+}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h1 class="h3 m-0">@T["title_categories"]</h1>
+    <a class="btn btn-brand" asp-action="Create">+ @T["create_category"]</a>
+</div>
+@if (!Model.Any()) { <div class="panel text-center py-5 text-muted">@T["no_categories"]</div> }
+else
+{
+    <div class="panel p-0 table-wrap">
+        <table class="table align-middle m-0">
+            <thead><tr><th>@T["category"]</th><th>@T["description"]</th><th>@T["dish_count"]</th><th class="text-end">@T["actions"]</th></tr></thead>
+            <tbody>
+            @foreach (var c in Model)
+            {
+                <tr>
+                    <td class="fw-semibold">@c.Name</td>
+                    <td>@c.Description</td>
+                    <td><a class="pill pill-cat text-decoration-none" asp-controller="Dishes" asp-action="Index" asp-route-categoryId="@c.Id">@c.Dishes.Count</a></td>
+                    <td class="text-end text-nowrap">
+                        <a class="btn btn-sm btn-outline-dark" asp-action="Edit" asp-route-id="@c.Id">@T["edit"]</a>
+                        <form method="post" asp-action="Delete" asp-route-id="@c.Id" class="d-inline" onsubmit="return confirm('@cf')">
+                            <button class="btn btn-sm btn-outline-danger" type="submit">@T["delete"]</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
